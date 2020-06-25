@@ -881,7 +881,9 @@ func (bc *brokerConsumer) fetchNewMessages() (*FetchResponse, error) {
 	}
 	if bc.consumer.conf.Version.IsAtLeast(V0_10_1_0) {
 		request.Version = 3
-		request.MaxBytes = MaxResponseSize
+		// request around 2/3 of the max response size, as the broker might send more data
+		// than requested. We wuold prefer not to throw the message away in such a case.
+		request.MaxBytes = MaxResponseSize * 2 / 3
 	}
 	if bc.consumer.conf.Version.IsAtLeast(V0_11_0_0) {
 		request.Version = 4
